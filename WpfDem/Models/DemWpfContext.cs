@@ -1,0 +1,145 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace WpfDem.Models;
+
+public partial class DemWpfContext : DbContext
+{
+    public DemWpfContext()
+    {
+    }
+
+    public DemWpfContext(DbContextOptions<DemWpfContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Category> Categories { get; set; }
+
+    public virtual DbSet<Manufacturer> Manufacturers { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<PickUpPoint> PickUpPoints { get; set; }
+
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<ProductInOrder> ProductInOrders { get; set; }
+
+    public virtual DbSet<Supplier> Suppliers { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=221-00;Initial Catalog=DemWpf;Integrated Security=True;Encrypt=True;TrustServerCertificate=True");
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.ToTable("Category");
+
+            entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Manufacturer>(entity =>
+        {
+            entity.ToTable("Manufacturer");
+
+            entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Order");
+
+            entity.Property(e => e.OrderDate).HasColumnType("datetime");
+            entity.Property(e => e.ShipDate).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(255);
+
+            entity.HasOne(d => d.PickUpPoint).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.PickUpPointId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_PickUpPoint");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_User");
+        });
+
+        modelBuilder.Entity<PickUpPoint>(entity =>
+        {
+            entity.ToTable("PickUpPoint");
+
+            entity.Property(e => e.Address).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.ToTable("Product");
+
+            entity.Property(e => e.Article).HasMaxLength(255);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.Property(e => e.Photo).HasMaxLength(255);
+            entity.Property(e => e.Price).HasColumnType("decimal(8, 2)");
+            entity.Property(e => e.Unit).HasMaxLength(255);
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Product_Category");
+
+            entity.HasOne(d => d.Manufacturer).WithMany(p => p.Products)
+                .HasForeignKey(d => d.ManufacturerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Product_Manufacturer");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.Products)
+                .HasForeignKey(d => d.SupplierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Product_Supplier");
+        });
+
+        modelBuilder.Entity<ProductInOrder>(entity =>
+        {
+            entity.HasKey(e => new { e.OrderId, e.ProductId });
+
+            entity.ToTable("ProductInOrder");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.ProductInOrders)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductInOrder_Order");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductInOrders)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductInOrder_Product");
+        });
+
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.ToTable("Supplier");
+
+            entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("User");
+
+            entity.Property(e => e.FullName).HasMaxLength(255);
+            entity.Property(e => e.Login).HasMaxLength(255);
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.Role).HasMaxLength(255);
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}
