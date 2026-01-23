@@ -21,7 +21,15 @@ namespace WpfDem
         {
             InitializeComponent();
 
+            MainFrame.Navigated += MainFrame_Navigated;
+
             MainFrame.Navigate(new LoginPage(MainFrame));
+
+        }
+
+        private void MainFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+            this.Title = ((Page)MainFrame.Content).Title;
         }
     }
 }

@@ -7,7 +7,15 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ProductsPage">
-
+    <Page.Resources>
+        <Style x:Key="PriceTextStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasDiscount}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,10 +24,30 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <TextBlock x:Name="UserNameText"/>
+            <TextBlock x:Name="UserNameText" VerticalAlignment="Center"/>
+            <Image Source="/Icon.png" Stretch="Uniform" Height="40"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10">
+            <Button Content="Выйти" Width="100" Click="Back_Click"/>
+            <Button Content="Добавить продукт" x:Name="AddButton" Width="150" Click="Button_Click"  Margin="10,0,0,0"/>
         </StackPanel>
 
-        <ListView x:Name="ProductsListView" Grid.Row="2" HorizontalContentAlignment="Stretch">
+        <StackPanel x:Name="FilterSortPanel" Grid.Row="1" Orientation="Horizontal" Margin="5">
+            <TextBlock Text="Поиск"/>
+            <TextBox Width="300" x:Name="SearchBox" TextChanged="FilterChanged" Margin="5,0,5,0" />
+
+            <ComboBox x:Name="SupplierFilter" Width="150" SelectionChanged="FilterChanged"/>
+            <TextBlock Text="Сортировка по кол-ву" Margin="5,0,5,0"/>
+            <ComboBox x:Name="SortBox" Width="150" SelectionChanged="FilterChanged">
+                <ComboBoxItem Content="Без сортировки"/>
+                <ComboBoxItem Content="По возрастанию"/>
+                <ComboBoxItem Content="По убыванию"/>
+            </ComboBox>
+        </StackPanel>
+        
+        <ListView x:Name="ProductsListView" Grid.Row="2"
+                  HorizontalContentAlignment="Stretch" 
+                  MouseDoubleClick="ProductsListView_MouseDoubleClick">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Style.Triggers>
@@ -61,13 +89,15 @@
                                     <Run Text="Поставщик: "/>
                                     <Run Text="{Binding Supplier.Name}"/>
                                 </TextBlock>
-                                <TextBlock>
-                                    <Run Text="Цена: "/>
-                                    <Run Text="{Binding Price, StringFormat=C}" 
-                                         Foreground="Red" 
-                                         TextDecorations="Strikethrough"/>
-                                    <Run Text="{Binding DiscountedPrice, StringFormat=C, Mode=OneWay}"/>
-                                </TextBlock>
+                                
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Цена: "/>
+                                    <TextBlock  Text="{Binding Price, StringFormat=C}" 
+                                                Foreground="Red" 
+                                                TextDecorations="Strikethrough" Style="{StaticResource PriceTextStyle}"/>
+                                    <TextBlock Text="{Binding DiscountedPrice, StringFormat=C, Mode=OneWay}"/>
+                                </StackPanel>
+                                
                                 <TextBlock>
                                     <Run Text="Единица измерения: "/>
                                     <Run Text="{Binding Unit}"/>

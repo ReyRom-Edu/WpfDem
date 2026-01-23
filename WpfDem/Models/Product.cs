@@ -52,5 +52,7 @@ public partial class Product
 
     public bool IsBigDiscount => Discount > 15;
 
+    public bool HasDiscount => Discount > 0;
+
     public decimal DiscountedPrice => Price * (1 - Discount / 100M);
 }

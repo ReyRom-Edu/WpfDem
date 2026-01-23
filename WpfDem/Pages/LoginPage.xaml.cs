@@ -27,24 +27,35 @@ namespace WpfDem.Pages
         {
             InitializeComponent();
             _frame = mainFrame;
+            this.Title = "Авторизация";
         }
 
         private void Login_Click(object sender, RoutedEventArgs e)
         {
-            var user = Core.Context.Users.FirstOrDefault(u=>
-                            u.Login == LoginBox.Text &&
-                            u.Password == PasswordBox.Password);
-
-            if(user == null)
+            try
             {
-                MessageBox.Show("Неверный логин или пароль", 
-                    "Ошибка", 
-                    MessageBoxButton.OK, 
-                    MessageBoxImage.Error);
-                return;
-            }
+                var user = Core.Context.Users.FirstOrDefault(u=>
+                                u.Login == LoginBox.Text &&
+                                u.Password == PasswordBox.Password);
 
-            _frame.Navigate(new ProductsPage(_frame, user));
+                if(user == null)
+                {
+                    MessageBox.Show("Неверный логин или пароль", 
+                        "Ошибка", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                _frame.Navigate(new ProductsPage(_frame, user));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Авторизация не удалась, проверьте подключение к БД",
+                        "Ошибка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+            }
         }
 
         private void Guest_Click(object sender, RoutedEventArgs e)
